@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Donor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+    <div class="nav-container">
+        <a class="brand" href="index.html">Blood Bank Management</a>
+        <nav class="main-nav">
+            <a href="index.html">Home</a>
+            <a href="donors.html">Donors</a>
+            <a href="blood-stock.html">Blood Stock</a>
+            <a href="blood-requests.html">Blood Requests</a>
+            <a href="reports.html">Reports</a>
+        </nav>
+    </div>
+</header>
+
+<main class="form-container">
+    <h1>Update Donor Details</h1>
+    <img class="page-image" src="images/update-donor.jpg"
+         alt="Blood donors" onerror="this.style.display='none'">
+
+    <div class="form-group">
+        <label for="donorSelect">Select Donor</label>
+        <select id="donorSelect" required>
+            <option value="">Loading donors...</option>
+        </select>
+    </div>
+
+    <form id="updateForm">
+        <div class="form-group">
+            <label for="name">Donor Name</label>
+            <input id="name" name="name" required maxlength="100">
+        </div>
+        <div class="form-group">
+            <label for="age">Age</label>
+            <input id="age" name="age" type="number" min="18" max="100" required>
+        </div>
+        <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender" required>
+                <option value="">Select gender</option>
+                <option>Male</option><option>Female</option><option>Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="blood_group">Blood Group</label>
+            <select id="blood_group" name="blood_group" required>
+                <option value="">Select blood group</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>AB+</option><option>AB-</option>
+                <option>O+</option><option>O-</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input id="phone" name="phone" type="tel" maxlength="15" required>
+        </div>
+        <button type="submit">Update Donor</button>
+        <p id="message" class="message"></p>
+    </form>
+</main>
+
+<script>
+const select = document.getElementById("donorSelect");
+const form = document.getElementById("updateForm");
+const message = document.getElementById("message");
+
+async function loadDonors() {
+    try {
+        const response = await fetch("/api/donors");
+        if (!response.ok) throw new Error("Unable to fetch donors");
+        const donors = await response.json();
+
+        select.replaceChildren(new Option("Select a donor", ""));
+        donors.forEach(d => {
+            select.add(new Option(`${d.donor_id} - ${d.name}`, d.donor_id));
+        });
+    } catch (error) {
+        select.replaceChildren(new Option("Could not load donors", ""));
+        message.textContent = error.message;
+    }
+}
+
+select.addEventListener("change", async function() {
+    if (!this.value) {
+        form.reset();
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/donors/" + encodeURIComponent(this.value));
+        if (!response.ok) throw new Error("Could not load selected donor");
+
+        const d = await response.json();
+        form.elements.name.value = d.name ?? "";
+        form.elements.age.value = d.age ?? "";
+        form.elements.gender.value = d.gender ?? "";
+        form.elements.blood_group.value = d.blood_group ?? "";
+        form.elements.phone.value = d.phone ?? "";
+        message.textContent = "";
+    } catch (error) {
+        message.textContent = error.message;
+    }
+});
+
+form.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    if (!select.value) {
+        message.textContent = "Please select a donor first.";
+        return;
+    }
+
+    const data = Object.fromEntries(new FormData(form).entries());
+    data.age = Number(data.age);
+
+    try {
+        const response = await fetch("/api/donors/" + encodeURIComponent(select.value), {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || result.error || "Update failed");
+
+        message.textContent = "Donor updated successfully.";
+        await loadDonors();
+        select.value = "";
+        form.reset();
+    } catch (error) {
+        message.textContent = "Error: " + error.message;
+    }
+});
+
+loadDonors();
+</script>
+</body>
+</html>

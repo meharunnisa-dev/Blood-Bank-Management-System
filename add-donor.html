@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add Donor - Blood Bank Management</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .donor-form-container {
+            max-width: 650px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .donor-form-container h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #673954;
+        }
+
+        .description {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font: inherit;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 11px 20px;
+            background: #874f72;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font: inherit;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #673954;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            overflow-wrap: anywhere;
+        }
+
+        .message.success {
+            display: block;
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            display: block;
+            color: #721c24;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 600px) {
+            .donor-form-container {
+                margin: 20px 12px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <header class="topbar">
+        <div class="nav-container">
+
+            <a class="brand" href="index.html">
+                Blood Bank Management
+            </a>
+
+            <nav class="main-nav">
+                <a href="index.html">Home</a>
+                <a href="donors.html">Donors</a>
+                <a href="blood-stock.html">Blood Stock</a>
+                <a href="blood-requests.html">Blood Requests</a>
+                <a href="reports.html">Reports</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- Add Donor Form -->
+    <main class="donor-form-container">
+
+        <img
+            src="images/add-donor.jpg"
+            alt="Blood donor"
+            style="display:block; width:100%; max-height:260px;
+            object-fit:cover; border-radius:10px; margin-bottom:20px;"
+            onerror="this.style.display='none'"
+        >
+
+        <h1>Add New Donor</h1>
+
+        <p class="description">
+            Enter the donor's information below.
+        </p>
+
+        <form id="addDonorForm">
+
+            <div class="form-group">
+                <label for="name">Donor Name</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter donor name"
+                    maxlength="100"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input
+                    type="number"
+                    id="age"
+                    name="age"
+                    placeholder="Enter age"
+                    min="18"
+                    max="100"
+                    step="1"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="blood_group">Blood Group</label>
+                <select id="blood_group" name="blood_group" required>
+                    <option value="">Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="Enter phone number"
+                    maxlength="15"
+                    pattern="[0-9+\-\s]{10,15}"
+                    title="Enter a valid phone number."
+                    required
+                >
+            </div>
+
+            <div class="form-actions">
+
+                <button type="submit" class="btn" id="saveButton">
+                    Save Donor
+                </button>
+
+                <a href="donors.html" class="btn">
+                    Back to Donor Management
+                </a>
+
+            </div>
+
+            <p id="message" class="message" role="status"
+               aria-live="polite"></p>
+
+        </form>
+
+    </main>
+
+    <script>
+        const form = document.getElementById("addDonorForm");
+        const message = document.getElementById("message");
+        const saveButton = document.getElementById("saveButton");
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = "message " + type;
+        }
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const donor = {
+                name: document.getElementById("name").value.trim(),
+                age: Number(document.getElementById("age").value),
+                gender: document.getElementById("gender").value,
+                blood_group: document.getElementById("blood_group").value,
+                phone: document.getElementById("phone").value.trim()
+            };
+
+            if (!donor.name) {
+                showMessage("Please enter the donor name.", "error");
+                return;
+            }
+
+            if (
+                !Number.isInteger(donor.age) ||
+                donor.age < 18 ||
+                donor.age > 100
+            ) {
+                showMessage(
+                    "Please enter an age between 18 and 100.",
+                    "error"
+                );
+                return;
+            }
+
+            saveButton.disabled = true;
+            saveButton.textContent = "Saving...";
+            message.className = "message";
+
+            try {
+                const response = await fetch("/api/donors", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify(donor)
+                });
+
+                const text = await response.text();
+                let result = {};
+
+                if (text) {
+                    try {
+                        result = JSON.parse(text);
+                    } catch {
+                        result = {};
+                    }
+                }
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.message ||
+                        result.error ||
+                        "Unable to save donor. Server error: " +
+                        response.status
+                    );
+                }
+
+                showMessage(
+                    result.message || "Donor saved successfully!",
+                    "success"
+                );
+
+                form.reset();
+
+            } catch (error) {
+                console.error("Add donor error:", error);
+
+                showMessage(
+                    "Error: " + error.message,
+                    "error"
+                );
+
+            } finally {
+                saveButton.disabled = false;
+                saveButton.textContent = "Save Donor";
+            }
+        });
+    </script>
+
+</body>
+</html>

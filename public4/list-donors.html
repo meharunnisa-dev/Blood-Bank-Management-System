@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Donors</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+    <div class="nav-container">
+        <a class="brand" href="index.html">Blood Bank Management</a>
+        <nav class="main-nav">
+            <a href="index.html">Home</a>
+            <a href="donors.html">Donors</a>
+            <a href="blood-stock.html">Blood Stock</a>
+            <a href="blood-requests.html">Blood Requests</a>
+            <a href="reports.html">Reports</a>
+        </nav>
+    </div>
+</header>
+
+<main class="form-container">
+    <h1>Registered Blood Donors</h1>
+    <img class="page-image" src="images/list-donors.jpg"
+         alt="Blood donors" onerror="this.style.display='none'">
+
+    <p id="message" class="message">Loading donor records...</p>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th><th>Name</th><th>Age</th>
+                    <th>Gender</th><th>Blood Group</th><th>Phone</th>
+                </tr>
+            </thead>
+            <tbody id="donorRows"></tbody>
+        </table>
+    </div>
+</main>
+
+<script>
+async function loadDonors() {
+    const message = document.getElementById("message");
+    try {
+        const response = await fetch("/api/donors");
+        if (!response.ok) throw new Error("Server returned " + response.status);
+
+        const donors = await response.json();
+        const tbody = document.getElementById("donorRows");
+        tbody.replaceChildren();
+
+        if (!Array.isArray(donors) || donors.length === 0) {
+            message.textContent = "No donor records found.";
+            return;
+        }
+
+        donors.forEach(d => {
+            const tr = document.createElement("tr");
+            [d.donor_id, d.name, d.age, d.gender, d.blood_group, d.phone]
+                .forEach(value => {
+                    const td = document.createElement("td");
+                    td.textContent = value ?? "";
+                    tr.appendChild(td);
+                });
+            tbody.appendChild(tr);
+        });
+        message.textContent = "Donor records loaded successfully.";
+    } catch (error) {
+        message.textContent = "Could not load donor records. Check that app9.js and MySQL are running.";
+    }
+}
+loadDonors();
+</script>
+</body>
+</html>

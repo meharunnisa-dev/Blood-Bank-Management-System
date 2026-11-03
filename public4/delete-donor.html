@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Donor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+    <div class="nav-container">
+        <a class="brand" href="index.html">Blood Bank Management</a>
+        <nav class="main-nav">
+            <a href="index.html">Home</a>
+            <a href="donors.html">Donors</a>
+            <a href="blood-stock.html">Blood Stock</a>
+            <a href="blood-requests.html">Blood Requests</a>
+            <a href="reports.html">Reports</a>
+        </nav>
+    </div>
+</header>
+
+<main class="form-container">
+    <h1>Delete Donor</h1>
+    <img class="page-image" src="images/delete-donor.jpg"
+         alt="Blood donors" onerror="this.style.display='none'">
+
+    <div class="form-group">
+        <label for="donorSelect">Select Donor</label>
+        <select id="donorSelect">
+            <option value="">Loading donors...</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <p id="details">Select a donor to see the record.</p>
+    </div>
+
+    <button id="deleteButton" type="button">Delete Selected Donor</button>
+    <p id="message" class="message"></p>
+</main>
+
+<script>
+const select = document.getElementById("donorSelect");
+const details = document.getElementById("details");
+const message = document.getElementById("message");
+
+async function loadDonors() {
+    try {
+        const response = await fetch("/api/donors");
+        if (!response.ok) throw new Error("Unable to load donors");
+        const donors = await response.json();
+
+        select.replaceChildren(new Option("Select a donor", ""));
+        donors.forEach(d => select.add(new Option(
+            `${d.donor_id} - ${d.name} (${d.blood_group})`, d.donor_id
+        )));
+    } catch (error) {
+        select.replaceChildren(new Option("Could not load donors", ""));
+        message.textContent = error.message;
+    }
+}
+
+select.addEventListener("change", async function() {
+    if (!this.value) {
+        details.textContent = "Select a donor to see the record.";
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/donors/" + encodeURIComponent(this.value));
+        if (!response.ok) throw new Error("Could not load donor details");
+        const d = await response.json();
+        details.textContent =
+            `Name: ${d.name} | Age: ${d.age} | Blood group: ${d.blood_group} | Phone: ${d.phone}`;
+    } catch (error) {
+        details.textContent = error.message;
+    }
+});
+
+document.getElementById("deleteButton").addEventListener("click", async function() {
+    if (!select.value) {
+        message.textContent = "Please select a donor.";
+        return;
+    }
+
+    if (!confirm("Are you sure you want to delete this donor record?")) return;
+
+    try {
+        const response = await fetch("/api/donors/" + encodeURIComponent(select.value), {
+            method: "DELETE"
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || result.error || "Delete failed");
+
+        message.textContent = "Donor deleted successfully.";
+        details.textContent = "Select a donor to see the record.";
+        await loadDonors();
+    } catch (error) {
+        message.textContent = "Error: " + error.message;
+    }
+});
+
+loadDonors();
+</script>
+</body>
+</html>

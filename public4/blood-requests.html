@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Request Management</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .request-hero {
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .request-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .request-card {
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .request-card h2 {
+            margin-top: 0;
+        }
+
+        .request-card a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 18px;
+            background: #874f72;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .request-card a:hover {
+            background: #673954;
+        }
+
+        @media (max-width: 700px) {
+            .request-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="nav-container">
+        <a class="brand" href="index.html">Blood Bank Management</a>
+
+        <nav class="main-nav">
+            <a href="index.html">Home</a>
+            <a href="donors.html">Donors</a>
+            <a href="blood-stock.html">Blood Stock</a>
+            <a href="blood-requests.html">Blood Requests</a>
+            <a href="reports.html">Reports</a>
+        </nav>
+    </div>
+</header>
+
+<main class="form-container">
+
+    <section class="request-hero">
+        <h1>Blood Request Management</h1>
+        <p>Create, view, update, and delete blood requests.</p>
+    </section>
+
+    <section class="request-grid">
+
+        <article class="request-card">
+            <h2>Add New Request</h2>
+            <p>Register a new blood request.</p>
+            <a href="add-request.html">Open Page</a>
+        </article>
+
+        <article class="request-card">
+            <h2>List Requests</h2>
+            <p>View all registered blood requests.</p>
+            <a href="list-requests.html">Open Page</a>
+        </article>
+
+        <article class="request-card">
+            <h2>Update Request</h2>
+            <p>Update an existing blood request.</p>
+            <a href="update-request.html">Open Page</a>
+        </article>
+
+        <article class="request-card">
+            <h2>Delete Request</h2>
+            <p>Remove a blood request.</p>
+            <a href="delete-request.html">Open Page</a>
+        </article>
+
+    </section>
+
+</main>
+
+</body>
+</html>

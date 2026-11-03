@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Blood Stock</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="nav-container">
+        <a class="brand" href="index.html">Blood Bank Management</a>
+
+        <nav class="main-nav">
+            <a href="index.html">Home</a>
+            <a href="donors.html">Donors</a>
+            <a href="blood-stock.html">Blood Stock</a>
+            <a href="blood-requests.html">Blood Requests</a>
+            <a href="reports.html">Reports</a>
+        </nav>
+    </div>
+</header>
+
+<main class="form-container">
+    <div class="view-stock image">
+        <img src="images/view-stock.jpg"
+        alt="blood stock view">
+    </div>
+
+    <h1>Available Blood Stock</h1>
+
+    <p>View the current units available for each blood group.</p>
+
+    <a href="blood-stock.html" class="btn">Back</a>
+
+    <a href="update-stock.html" class="btn">Update Stock</a>
+
+    <p id="message" class="message">Loading stock...</p>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Stock ID</th>
+                    <th>Blood Group</th>
+                    <th>Units Available</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+
+            <tbody id="stockRows"></tbody>
+        </table>
+    </div>
+
+</main>
+
+<script>
+async function loadBloodStock() {
+    const tbody = document.getElementById("stockRows");
+    const message = document.getElementById("message");
+
+    try {
+        const response = await fetch("/api/stock");
+
+        if (!response.ok) {
+            throw new Error("Unable to retrieve blood stock.");
+        }
+
+        const stocks = await response.json();
+
+        tbody.replaceChildren();
+
+        if (!Array.isArray(stocks) || stocks.length === 0) {
+            message.textContent = "No blood stock records found.";
+            return;
+        }
+
+        stocks.forEach(stock => {
+            const row = document.createElement("tr");
+
+            const values = [
+                stock.stock_id ?? "",
+                stock.blood_group ?? "",
+                stock.units_available ?? 0,
+                stock.last_updated
+                    ? String(stock.last_updated).slice(0, 10)
+                    : ""
+            ];
+
+            values.forEach(value => {
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                row.appendChild(cell);
+            });
+
+            tbody.appendChild(row);
+        });
+
+        message.textContent = "Blood stock loaded successfully.";
+
+    } catch (error) {
+        message.textContent =
+            "Unable to load stock. Check your backend server and database.";
+    }
+}
+
+loadBloodStock();
+</script>
+
+</body>
+</html>

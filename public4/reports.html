@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Blood Bank Reports</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .report-header {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .report-section {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        .report-section h2 {
+            margin-top: 0;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: #874f72;
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f9f4f7;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 18px;
+            margin: 5px;
+            background: #874f72;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #673954;
+        }
+
+        .message {
+            margin-top: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <header class="topbar">
+        <div class="nav-container">
+
+            <a class="brand" href="index.html">
+                Blood Bank Management
+            </a>
+
+            <nav class="main-nav">
+                <a href="index.html">Home</a>
+                <a href="donors.html">Donors</a>
+                <a href="blood-stock.html">Blood Stock</a>
+                <a href="blood-requests.html">Blood Requests</a>
+                <a href="reports.html">Reports</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="form-container">
+        <div class="reports image">
+            <img src="images/reports.jpg"
+            alt="reports view"> 
+        </div>
+
+        <section class="report-header">
+
+            <h1>Blood Bank Reports</h1>
+
+            <p>
+                View donor records, available blood stock,
+                and registered blood requests.
+            </p>
+
+            <button
+                type="button"
+                class="btn"
+                id="refreshReports">
+                Refresh All Reports
+            </button>
+
+        </section>
+
+        <!-- DONOR REPORT -->
+        <section class="report-section">
+
+            <h2>Donor Report</h2>
+
+            <p id="donorMessage" class="message">
+                Loading donor records...
+            </p>
+
+            <div class="table-container">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Donor ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Blood Group</th>
+                            <th>Phone</th>
+                            
+                        </tr>
+                    </thead>
+
+                    <tbody id="donorRows"></tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- BLOOD STOCK REPORT -->
+        <section class="report-section">
+
+            <h2>Blood Stock Report</h2>
+
+            <p id="stockMessage" class="message">
+                Loading blood stock...
+            </p>
+
+            <div class="table-container">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Stock ID</th>
+                            <th>Blood Group</th>
+                            <th>Units Available</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="stockRows"></tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- BLOOD REQUEST REPORT -->
+        <section class="report-section">
+
+            <h2>Blood Request Report</h2>
+
+            <p id="requestMessage" class="message">
+                Loading blood requests...
+            </p>
+
+            <div class="table-container">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Hospital Name</th>
+                            <th>Blood Group</th>
+                            <th>Units Required</th>
+                            <th>Request Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="requestRows"></tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        // Load donor report
+        async function loadDonorReport() {
+
+            const tbody = document.getElementById("donorRows");
+            const message = document.getElementById("donorMessage");
+
+            tbody.replaceChildren();
+            message.textContent = "Loading donor records...";
+
+            try {
+
+                const response = await fetch("/api/donors");
+
+                if (!response.ok) {
+                    throw new Error("Server error: " + response.status);
+                }
+
+                const donors = await response.json();
+
+                if (!Array.isArray(donors)) {
+                    throw new Error("Expected a list of donors.");
+                }
+
+                if (donors.length === 0) {
+                    message.textContent = "No donor records found.";
+                    return;
+                }
+
+                donors.forEach(donor => {
+
+                    const row = document.createElement("tr");
+
+                    const values = [
+                        donor.donor_id,
+                        donor.name,
+                        donor.age,
+                        donor.gender,
+                        donor.blood_group,
+                        donor.phone,
+                        donor.address
+                    ];
+
+                    values.forEach(value => {
+
+                        const cell = document.createElement("td");
+
+                        cell.textContent =
+                            value === null || value === undefined
+                                ? ""
+                                : value;
+
+                        row.appendChild(cell);
+
+                    });
+
+                    tbody.appendChild(row);
+
+                });
+
+                message.textContent =
+                    "Total donors: " + donors.length;
+
+            } catch (error) {
+
+                message.textContent =
+                    "Unable to load donors. Check /api/donors.";
+
+                console.error("Donor report error:", error);
+
+            }
+        }
+
+
+        // Load blood stock report
+        async function loadStockReport() {
+
+            const tbody = document.getElementById("stockRows");
+            const message = document.getElementById("stockMessage");
+
+            tbody.replaceChildren();
+            message.textContent = "Loading blood stock...";
+
+            try {
+
+                const response = await fetch("/api/stock");
+
+                if (!response.ok) {
+                    throw new Error("Server error: " + response.status);
+                }
+
+                const stocks = await response.json();
+
+                if (!Array.isArray(stocks)) {
+                    throw new Error("Expected a list of stock records.");
+                }
+
+                if (stocks.length === 0) {
+                    message.textContent = "No blood stock records found.";
+                    return;
+                }
+
+                stocks.forEach(stock => {
+
+                    const row = document.createElement("tr");
+
+                    const values = [
+                        stock.stock_id,
+                        stock.blood_group,
+                        stock.units_available,
+                        stock.last_updated
+                    ];
+
+                    values.forEach(value => {
+
+                        const cell = document.createElement("td");
+
+                        cell.textContent =
+                            value === null || value === undefined
+                                ? ""
+                                : value;
+
+                        row.appendChild(cell);
+
+                    });
+
+                    tbody.appendChild(row);
+
+                });
+
+                message.textContent =
+                    "Total stock records: " + stocks.length;
+
+            } catch (error) {
+
+                message.textContent =
+                    "Unable to load blood stock. Check /api/stock.";
+
+                console.error("Stock report error:", error);
+
+            }
+        }
+
+
+        // Load blood request report
+        async function loadRequestReport() {
+
+            const tbody = document.getElementById("requestRows");
+            const message = document.getElementById("requestMessage");
+
+            tbody.replaceChildren();
+            message.textContent = "Loading blood requests...";
+
+            try {
+
+                const response = await fetch("/api/requests");
+
+                if (!response.ok) {
+                    throw new Error("Server error: " + response.status);
+                }
+
+                const requests = await response.json();
+
+                if (!Array.isArray(requests)) {
+                    throw new Error("Expected a list of requests.");
+                }
+
+                if (requests.length === 0) {
+                    message.textContent = "No blood requests found.";
+                    return;
+                }
+
+                requests.forEach(request => {
+
+                    const row = document.createElement("tr");
+
+                    const values = [
+                        request.request_id,
+                        request.hospital_name,
+                        request.blood_group,
+                        request.units_required,
+                        request.request_date,
+                        request.status
+                    ];
+
+                    values.forEach(value => {
+
+                        const cell = document.createElement("td");
+
+                        cell.textContent =
+                            value === null || value === undefined
+                                ? ""
+                                : value;
+
+                        row.appendChild(cell);
+
+                    });
+
+                    tbody.appendChild(row);
+
+                });
+
+                message.textContent =
+                    "Total blood requests: " + requests.length;
+
+            } catch (error) {
+
+                message.textContent =
+                    "Unable to load blood requests. Check /api/requests.";
+
+                console.error("Request report error:", error);
+
+            }
+        }
+
+
+        // Refresh all three reports
+        async function loadAllReports() {
+
+            await Promise.all([
+                loadDonorReport(),
+                loadStockReport(),
+                loadRequestReport()
+            ]);
+
+        }
+
+        document.getElementById("refreshReports")
+            .addEventListener("click", loadAllReports);
+
+        // Automatically load reports when the page opens
+        loadAllReports();
+    </script>
+
+</body>
+
+</html>

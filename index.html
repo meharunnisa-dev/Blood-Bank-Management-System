@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | Blood Bank Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="homepage">
+
+<header>
+    <div class="container">
+        <h2>Blood Bank Management System</h2>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="donors.html">Donors</a>
+            <a href="blood-stock.html">Blood Stock</a>
+            <a href="blood-requests.html">Blood Requests</a>
+            <a href="reports.html">Reports</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <section class="hero home-hero">
+        <div class="hero-content">
+            <h1>Welcome to Blood Bank Management System</h1>
+            <p>Connecting generous blood donors with patients and hospitals in need. Manage donors, monitor blood availability, and track hospital requests in one place.</p>
+            <a href="add-donor.html" class="button">Register a Donor</a>
+            <a href="blood-stock.html" class="button gold">View Blood Stock</a>
+        </div>
+        <div class="hero-image">
+            <img src="images/homepage.jpg" alt="Blood donation and healthcare">
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Dashboard Overview</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Donors</h3>
+                <p class="stat-number" id="totalDonors">Loading...</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Blood Units</h3>
+                <p class="stat-number" id="totalBloodUnits">Loading...</p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending Requests</h3>
+                <p class="stat-number" id="pendingRequests">Loading...</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Hospitals</h3>
+                <p class="stat-number" id="totalHospitals">Loading...</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-graph">
+        <h2>Blood Bank Summary</h2>
+        <div class="graph-row">
+            <span class="graph-label">Total Donors</span>
+            <div class="graph-track"><div class="graph-bar" id="donorBar"></div></div>
+            <span class="graph-value" id="donorGraphValue">0</span>
+        </div>
+        <div class="graph-row">
+            <span class="graph-label">Blood Units</span>
+            <div class="graph-track"><div class="graph-bar" id="unitsBar"></div></div>
+            <span class="graph-value" id="unitsGraphValue">0</span>
+        </div>
+        <div class="graph-row">
+            <span class="graph-label">Pending Requests</span>
+            <div class="graph-track"><div class="graph-bar" id="pendingBar"></div></div>
+            <span class="graph-value" id="pendingGraphValue">0</span>
+        </div>
+        <div class="graph-row">
+            <span class="graph-label">Hospitals</span>
+            <div class="graph-track"><div class="graph-bar" id="hospitalBar"></div></div>
+            <span class="graph-value" id="hospitalGraphValue">0</span>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Manage Blood Bank</h2>
+        <div class="card-grid">
+            <div class="card">
+                <img src="images/donors.jpg" alt="Blood donors">
+                <div class="card-content">
+                    <h3>Donor Management</h3>
+                    <p>Register donors and manage their information.</p>
+                    <a href="donors.html" class="button">Manage Donors</a>
+                </div>
+            </div>
+            <div class="card">
+                <img src="images/blood-stock.jpg" alt="Blood stock">
+                <div class="card-content">
+                    <h3>Blood Stock</h3>
+                    <p>Check available blood groups and update units.</p>
+                    <a href="blood-stock.html" class="button">Manage Stock</a>
+                </div>
+            </div>
+            <div class="card">
+                <img src="images/blood-requests.jpg" alt="Blood requests">
+                <div class="card-content">
+                    <h3>Blood Requests</h3>
+                    <p>Record and track hospital blood requests.</p>
+                    <a href="blood-requests.html" class="button">Manage Requests</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2026 Blood Bank Management System</p>
+    </div>
+</footer>
+
+<script>
+async function loadDashboard() {
+    try {
+        const response = await fetch("/api/stats");
+        if (!response.ok) throw new Error("Statistics could not be loaded");
+
+        const data = await response.json();
+
+        const values = {
+            totalDonors: Number(data.totalDonors || 0),
+            totalBloodUnits: Number(data.totalBloodUnits || 0),
+            pendingRequests: Number(data.pendingRequests || 0),
+            totalHospitals: Number(data.totalHospitals || 0)
+        };
+
+        Object.entries(values).forEach(([id, value]) => {
+            document.getElementById(id).textContent = value;
+        });
+
+        const max = Math.max(...Object.values(values), 1);
+        const rows = [
+            ["donorBar", "donorGraphValue", values.totalDonors],
+            ["unitsBar", "unitsGraphValue", values.totalBloodUnits],
+            ["pendingBar", "pendingGraphValue", values.pendingRequests],
+            ["hospitalBar", "hospitalGraphValue", values.totalHospitals]
+        ];
+
+        rows.forEach(([barId, valueId, value]) => {
+            document.getElementById(barId).style.width =
+                (value === 0 ? 0 : Math.max(5, value / max * 100)) + "%";
+            document.getElementById(valueId).textContent = value;
+        });
+    } catch (error) {
+        console.error(error);
+        ["totalDonors", "totalBloodUnits", "pendingRequests", "totalHospitals"]
+            .forEach(id => document.getElementById(id).textContent = "—");
+    }
+}
+loadDashboard();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Delete Blood Request</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Center the image and prevent the wide background box */
+        main.container > .page-image {
+            display: block !important;
+            width: 600px !important;
+            max-width: 100% !important;
+            height: 260px !important;
+            margin: 25px auto 20px !important;
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            overflow: hidden;
+            border-radius: 10px;
+            box-sizing: border-box;
+            float: none !important;
+        }
+
+        main.container > .page-image img {
+            display: block !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            object-fit: cover;
+            object-position: center;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            border-radius: 10px;
+            float: none !important;
+        }
+
+        .page-heading {
+            margin-top: 20px;
+        }
+
+        @media (max-width: 650px) {
+            main.container > .page-image {
+                width: 100% !important;
+                height: 220px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <header>
+        <div class="container">
+            <h2>Blood Bank Management System</h2>
+
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="donors.html">Donors</a>
+                <a href="blood-stock.html">Blood Stock</a>
+                <a href="blood-requests.html">Blood Requests</a>
+                <a href="reports.html">Reports</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+
+        <!-- Centered Image -->
+        <div class="page-image">
+            <img
+                src="images/delete-request.jpeg"
+                alt="Delete blood request"
+            >
+        </div>
+
+        <!-- Page Heading -->
+        <section class="page-heading">
+            <h1>Delete Blood Request</h1>
+            <p>Select the request record you want to remove.</p>
+        </section>
+
+        <!-- Delete Request Form -->
+        <div class="form-container">
+
+            <div class="form-group">
+                <label for="rid">Select Request</label>
+
+                <select id="rid">
+                    <option value="">Loading requests...</option>
+                </select>
+            </div>
+
+            <button type="button" class="danger" id="del">
+                Delete Selected Request
+            </button>
+
+            <p id="msg" role="status" aria-live="polite"></p>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Blood Bank Management System</p>
+        </div>
+    </footer>
+
+    <!-- Delete Request JavaScript -->
+    <script>
+        const sel = document.getElementById("rid");
+        const msg = document.getElementById("msg");
+        const delButton = document.getElementById("del");
+
+        async function load() {
+            try {
+                const response = await fetch("/api/requests");
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error || "Could not load requests."
+                    );
+                }
+
+                sel.innerHTML =
+                    '<option value="">Select request</option>';
+
+                data.forEach(function (request) {
+                    const option = document.createElement("option");
+
+                    option.value = request.request_id;
+
+                    option.textContent =
+                        request.request_id + " - " +
+                        request.hospital_name + " (" +
+                        request.blood_group + ")";
+
+                    sel.appendChild(option);
+                });
+
+                if (data.length === 0) {
+                    msg.textContent = "No blood requests available.";
+                    msg.className = "message";
+                } else {
+                    msg.textContent = "";
+                    msg.className = "";
+                }
+
+            } catch (error) {
+                msg.textContent = error.message;
+                msg.className = "message error";
+            }
+        }
+
+        delButton.addEventListener("click", async function () {
+
+            if (!sel.value) {
+                msg.textContent = "Please select a request.";
+                msg.className = "message error";
+                return;
+            }
+
+            const confirmed = confirm(
+                "Are you sure you want to delete this request?"
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                delButton.disabled = true;
+                delButton.textContent = "Deleting...";
+
+                const response = await fetch(
+                    "/api/requests/" +
+                    encodeURIComponent(sel.value),
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error || data.message || "Delete failed."
+                    );
+                }
+
+                msg.textContent =
+                    data.message || "Blood request deleted successfully!";
+
+                msg.className = "message success";
+
+                await load();
+
+            } catch (error) {
+                msg.textContent = error.message;
+                msg.className = "message error";
+
+            } finally {
+                delButton.disabled = false;
+                delButton.textContent = "Delete Selected Request";
+            }
+        });
+
+        load();
+    </script>
+
+</body>
+</html>
